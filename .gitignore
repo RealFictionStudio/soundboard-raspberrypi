@@ -1,2 +1,6 @@
 __pycache__/
 s*.txt
+*.mp4
+*.mp3
+*.wav
+test*.py
