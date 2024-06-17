@@ -38,7 +38,13 @@ def get_sound_file_paths():
     for i in range(len(config_dirs)):
         if config_dirs[i] is not None:
             chdir(config_dirs[i])
-            filename = listdir()[0]
-            config_dirs[i] = path.join(getcwd(), filename)
+            if len(listdir()) > 0:
+                filename = listdir()[0]
+                ext = filename.split(".")[-1]
+                if ext == "mp3" or ext == "mp4" or ext == "wav":
+                    config_dirs[i] = path.join(getcwd(), filename)
+                    continue
+            
+            config_dirs[i] = None
 
     return config_dirs

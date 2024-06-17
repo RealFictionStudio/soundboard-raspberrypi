@@ -2,6 +2,7 @@ from pynput import keyboard
 from pydub import AudioSegment
 from pydub.playback import play
 from load_config import get_sound_file_paths
+from os import getcwd, chdir
 
 
 class SoundBoardListener:
@@ -10,6 +11,7 @@ class SoundBoardListener:
         self.num_key_map = {str(k):k-96 for k in range(96, 106)}
         self.sound_audio_segments = []
         self.load_config()
+        self.numpad_active = False
 
 
     def on_press_default(key, message="pressed"):
@@ -20,7 +22,7 @@ class SoundBoardListener:
                 key))
             
 
-    def on_press_blank(key):
+    def on_press_blank(self, key):
         pass
 
 
@@ -43,13 +45,16 @@ class SoundBoardListener:
         if ki in self.num_key_map.keys() and len(ki)>=2:
             if debug:
                 print(self.num_key_map[ki])
-
-            play(self.sound_audio_segments[self.num_key_map[ki]])
+            if self.sound_audio_segments[self.num_key_map[ki]] is not None and self.numpad_active:
+                play(self.sound_audio_segments[self.num_key_map[ki]])
  
         if key == keyboard.Key.esc:
             # Stop listener
             self.alive = False
             return False
+        
+        if key == keyboard.Key.num_lock:
+            self.numpad_active = not self.numpad_active
         
 
     def start(self, on_press, on_release):
@@ -69,8 +74,18 @@ class SoundBoardListener:
         self.start(self.on_press_default, self.on_release_default)
 
 
+    def validate_path(self, p:str):
+        print(p)
+        if p is not None:
+            return AudioSegment.from_file(p)
+        else:
+            return None
+
+
     def load_config(self):
-        self.sound_audio_segments = list(map(AudioSegment.from_file, get_sound_file_paths()))
+        paths = get_sound_file_paths()
+        print(paths)
+        self.sound_audio_segments = list(map(self.validate_path, paths))
 
 
 
