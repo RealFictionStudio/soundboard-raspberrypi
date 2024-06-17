@@ -31,7 +31,7 @@ def check_config():
             mkdir(i)
             config_directories_paths.append(None)
         else:
-            print("Found config:", i, end="\t")
+            print("Found config dir:", i, sep="\t")
             config_directories_paths.append(path.join(getcwd(), i))
 
     return config_directories_paths

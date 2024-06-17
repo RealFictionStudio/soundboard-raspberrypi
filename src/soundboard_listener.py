@@ -11,8 +11,10 @@ class SoundBoardListener:
         self.alive = False
         self.num_key_map = {str(k):k-96 for k in range(96, 106)}
         self.sound_audio_segments = []
-        self.load_config()
+        self.working_path = getcwd()
         self.numpad_active = False
+        self.load_config()
+        self.is_playing = False
 
 
     def on_press_default(key, message:str="pressed") -> None:
@@ -46,11 +48,14 @@ class SoundBoardListener:
         if ki in self.num_key_map.keys() and len(ki)>=2:
             if debug:
                 print(self.num_key_map[ki])
-            if self.sound_audio_segments[self.num_key_map[ki]] is not None and self.numpad_active:
+            if self.sound_audio_segments[self.num_key_map[ki]] is not None and self.numpad_active and not self.is_playing:
+                self.is_playing = True
                 play(self.sound_audio_segments[self.num_key_map[ki]])
+                self.is_playing = False
 
         if key == keyboard.Key.num_lock:
             self.numpad_active = not self.numpad_active
+            Thread(target=self.change_power_state, daemon=True).start()
  
         if key == keyboard.Key.esc:
             # Stop listener
@@ -83,19 +88,32 @@ class SoundBoardListener:
         
     
     def parse_power_config(self, config:str) -> bool:
-        ...
+        config = config.strip()
+        print(config, len(config))    
+        if config == "1":
+            return True
+        else:
+            return False
 
 
     def load_config(self) -> None:
         paths = get_sound_file_paths()
         print(paths)
         self.sound_audio_segments = list(map(self.validate_path, paths))
-        with open("soundboard_ison.txt", 'r+') as sic:
-            self.alive = self.parse_power_config(sic.read())
+        chdir(self.working_path)
+        with open("soundboard_ison.txt", 'r') as sic:
+            self.numpad_active = self.parse_power_config(sic.read())
+            print(self.numpad_active)
+
 
     def change_power_state(self) -> None:
-        with open("soundboard_ison.txt", 'w+') as sic:
-            sic.write(str(int(self.alive)))
+        try:
+            with open("soundboard_ison.txt", 'w+') as sic:
+                sic.write(str(int(self.numpad_active)))
+            print("Power state save SUCCESSFUL")
+        except Exception as e:
+            print("Power state save FAILED")
+            print(e)
 
 
 if __name__ == "__main__":
