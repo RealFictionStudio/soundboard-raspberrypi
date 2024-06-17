@@ -7,10 +7,6 @@ def check_file():
     if "soundboard_essential_config.txt" not in listdir(getcwd()):
         with open("soundboard_essential_config.txt", 'w+') as ecf:
             ecf.write(f"""CONFIG_DIRECTORY = {getcwd()}""")
-
-    if "soundboard_ison.txt" not in listdir(getcwd()):
-        with open("soundboard_ison.txt", 'w+') as sic:
-            sic.write("0")
             
     
     with open("soundboard_essential_config.txt", 'r') as ecf:
